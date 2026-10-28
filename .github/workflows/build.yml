@@ -38,7 +38,7 @@ jobs:
       - name: Prepare the device-specific code
         run: |
           cd ~/android/lineage
-          #git clone https://github.com/flydrz/android_device_oppo_PBEM00 -b dummy_lineage-17.1
+          #git clone https://github.com/ZIDAN44/sm-t285yd -b dummy_lineage-17.1
           source build/envsetup.sh
           breakfast Z00A
       
