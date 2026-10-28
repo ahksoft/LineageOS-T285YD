@@ -42,16 +42,16 @@ jobs:
         run: |
           cd $BUILD_ROOT
           echo "=== Initializing LineageOS 14.1 repo ==="
-          repo init -u https://github.com/LineageOS/android.git -b lineage-14.1 --depth=1
+          repo init -u https://github.com/LineageOS/android.git -b cm-14.1 --depth=1
 
           echo "=== Adding device trees ==="
           mkdir -p .repo/local_manifests
           echo '<?xml version="1.0" encoding="UTF-8"?>' > .repo/local_manifests/gtexsltedd.xml
           echo '<manifest>' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="LineageOS/android_device_samsung_gtexsltedd" path="device/samsung/gtexsltedd" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="LineageOS/android_device_samsung_msm8917-common" path="device/samsung/msm8917-common" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="LineageOS/android_kernel_samsung_msm8917" path="kernel/samsung/msm8917" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="TheMuppets/proprietary_vendor_samsung" path="vendor/samsung" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="LineageOS/android_device_samsung_gtexsltedd" path="device/samsung/gtexsltedd" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="LineageOS/android_device_samsung_msm8917-common" path="device/samsung/msm8917-common" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="LineageOS/android_kernel_samsung_msm8917" path="kernel/samsung/msm8917" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="TheMuppets/proprietary_vendor_samsung" path="vendor/samsung" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
           echo '</manifest>' >> .repo/local_manifests/gtexsltedd.xml
 
           echo "=== Syncing source ==="
