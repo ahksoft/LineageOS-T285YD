@@ -41,25 +41,17 @@ jobs:
       - name: Initialize and sync the source
         run: |
           cd $BUILD_ROOT
-          echo "=== Initializing LineageOS 14.1 repo ==="
-          repo init -u https://github.com/LineageOS/android.git -b cm-14.1 --depth=1
-
-          echo "=== Adding device trees ==="
-          mkdir -p .repo/local_manifests
-          echo '<?xml version="1.0" encoding="UTF-8"?>' > .repo/local_manifests/gtexsltedd.xml
-          echo '<manifest>' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="LineageOS/android_device_samsung_gtexsltedd" path="device/samsung/gtexsltedd" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="LineageOS/android_device_samsung_msm8917-common" path="device/samsung/msm8917-common" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="LineageOS/android_kernel_samsung_msm8917" path="kernel/samsung/msm8917" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
-          echo '  <project name="TheMuppets/proprietary_vendor_samsung" path="vendor/samsung" remote="github" revision="cm-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
-          echo '</manifest>' >> .repo/local_manifests/gtexsltedd.xml
+          echo "=== Initializing SM-T285YD LineageOS 14.1 mirror ==="
+          # Device/kernel trees live in this custom manifest (nothingstopsme),
+          # not under official LineageOS/android.
+          repo init -u https://github.com/nothingstopsme/android_LineageOS.git -b cm-14.1_SM-T285YD --depth=1
 
           echo "=== Syncing source ==="
           repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
 
           echo "=== Checking directory structure ==="
           ls -la device/samsung/ || true
-          ls -la kernel/ || true
+          ls -la kernel/samsung/ || true
           df -h
 
       # LineageOS 14.1 (Android 7.1) needs an old host toolchain (JDK 8, python2),
@@ -109,21 +101,14 @@ jobs:
                 lunch lineage_gtexsltedd-userdebug
               }
 
-              echo "=== Setting up build environment ==="
-              # Set up Android build environment variables
-              export ARCH=arm64
-              export SUBARCH=arm64
-              export TARGET_KERNEL_CROSS_COMPILE_PREFIX=aarch64-linux-android-
+              # SM-T285YD is ARMv7 / sc8830 — do NOT force arm64 here.
+              # hwcomposer.sc8830 needs KERNEL_OBJ/usr/include, so build the
+              # kernel (bootimage) before systemimage.
+              echo "=== Building kernel / bootimage first (for headers) ==="
+              make -j$(nproc) bootimage
 
-              echo "=== Building full ROM with mka ==="
-              # Use mka which is optimized for Android builds
-              mka bacon || {
-                echo "mka bacon failed, trying make -j$(nproc)"
-                make -j$(nproc) bacon || {
-                  echo "bacon failed, trying bootimage+systemimage"
-                  make -j$(nproc) bootimage systemimage
-                }
-              }
+              echo "=== Building systemimage ==="
+              make -j$(nproc) systemimage
 
               echo "=== Packaging results ==="
               cd out/target/product/gtexsltedd
