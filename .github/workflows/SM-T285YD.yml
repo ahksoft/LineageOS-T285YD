@@ -46,7 +46,7 @@ jobs:
 
           echo "=== Adding device trees ==="
           mkdir -p .repo/local_manifests
-          cat > .repo/local_manifests/gtexsltedd.xml << 'EOF'
+          cat > .repo/local_manifests/gtexsltedd.xml << 'END'
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
   <project name="LineageOS/android_device_samsung_gtexsltedd" path="device/samsung/gtexsltedd" remote="github" revision="lineage-14.1" />
@@ -54,7 +54,7 @@ jobs:
   <project name="LineageOS/android_kernel_samsung_msm8917" path="kernel/samsung/msm8917" remote="github" revision="lineage-14.1" />
   <project name="TheMuppets/proprietary_vendor_samsung" path="vendor/samsung" remote="github" revision="lineage-14.1" />
 </manifest>
-EOF
+END
 
           echo "=== Syncing source ==="
           repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
