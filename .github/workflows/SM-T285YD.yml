@@ -47,6 +47,13 @@ jobs:
 
       # LineageOS 14.1 (Android 7.1) needs an old host toolchain (JDK 8, python2),
       # so the build runs inside an Ubuntu 18.04 container.
+
+      - name: Diagnose kernel setup
+        run: |
+          cd $BUILD_ROOT
+          ls kernel/samsung || true
+          grep -n "TARGET_KERNEL" device/samsung/gtexsltedd/BoardConfig.mk || true
+          grep -rn "KERNEL_OBJ" device/samsung/gtexsltedd hardware 2>/dev/null | head -20
       - name: Build boot.img and system.img
         run: |
           docker run --rm \
