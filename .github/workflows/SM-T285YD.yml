@@ -46,15 +46,13 @@ jobs:
 
           echo "=== Adding device trees ==="
           mkdir -p .repo/local_manifests
-          cat > .repo/local_manifests/gtexsltedd.xml << 'END'
-<?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-  <project name="LineageOS/android_device_samsung_gtexsltedd" path="device/samsung/gtexsltedd" remote="github" revision="lineage-14.1" />
-  <project name="LineageOS/android_device_samsung_msm8917-common" path="device/samsung/msm8917-common" remote="github" revision="lineage-14.1" />
-  <project name="LineageOS/android_kernel_samsung_msm8917" path="kernel/samsung/msm8917" remote="github" revision="lineage-14.1" />
-  <project name="TheMuppets/proprietary_vendor_samsung" path="vendor/samsung" remote="github" revision="lineage-14.1" />
-</manifest>
-END
+          echo '<?xml version="1.0" encoding="UTF-8"?>' > .repo/local_manifests/gtexsltedd.xml
+          echo '<manifest>' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="LineageOS/android_device_samsung_gtexsltedd" path="device/samsung/gtexsltedd" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="LineageOS/android_device_samsung_msm8917-common" path="device/samsung/msm8917-common" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="LineageOS/android_kernel_samsung_msm8917" path="kernel/samsung/msm8917" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '  <project name="TheMuppets/proprietary_vendor_samsung" path="vendor/samsung" remote="github" revision="lineage-14.1" />' >> .repo/local_manifests/gtexsltedd.xml
+          echo '</manifest>' >> .repo/local_manifests/gtexsltedd.xml
 
           echo "=== Syncing source ==="
           repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
@@ -76,7 +74,6 @@ END
           cat device/samsung/gtexsltedd/BoardConfig.mk 2>/dev/null | head -50 || true
           echo "=== Checking for kernel source ==="
           grep -r "TARGET_KERNEL_SOURCE" device/samsung/gtexsltedd/ 2>/dev/null || true
-
 
       - name: Build boot.img and system.img
         run: |
