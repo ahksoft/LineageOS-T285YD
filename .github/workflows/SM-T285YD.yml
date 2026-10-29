@@ -149,5 +149,5 @@ jobs:
         with:
           name: lineageos-sm-t285yd-${{ github.run_id }}
           path: |
-            $BUILD_ROOT/out/target/product/gtexsltedd/boot.img
-            $BUILD_ROOT/out/target/product/gtexsltedd/system.img
+            /mnt/lineage/out/target/product/gtexsltedd/boot.img
+            /mnt/lineage/out/target/product/gtexsltedd/system.img

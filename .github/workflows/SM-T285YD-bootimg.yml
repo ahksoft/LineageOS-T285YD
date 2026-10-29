@@ -129,4 +129,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bootimg-sm-t285yd-${{ github.run_id }}
-          path: $BUILD_ROOT/out/target/product/gtexsltedd/boot.img
+          path: /mnt/lineage/out/target/product/gtexsltedd/boot.img
