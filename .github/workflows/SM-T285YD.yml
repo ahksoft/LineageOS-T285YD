@@ -76,7 +76,7 @@ jobs:
             -e USE_CCACHE=0 \
             -e USER=builder \
             -w /build \
-            ubuntu:18.04 bash -c '
+            ubuntu:18.04 bash -c "
               set -ex
               export DEBIAN_FRONTEND=noninteractive
               apt-get update
@@ -91,52 +91,52 @@ jobs:
                 ln -s /usr/bin/python /usr/bin/python2
               fi
 
-              git config --global user.email "build@example.com"
-              git config --global user.name "builder"
+              git config --global user.email 'build@example.com'
+              git config --global user.name 'builder'
 
               # Jack (LineageOS 14.1) needs TLSv1; OpenJDK 8u292+ disables it and
               # then setup-jack-server dies with SSL error / Error 47.
               JAVA_SEC=/usr/lib/jvm/java-8-openjdk-amd64/jre/lib/security/java.security
-              sed -i -e "s/, TLSv1.1, TLSv1//" -e "s/, TLSv1, TLSv1.1//" "$JAVA_SEC"
-              export JACK_SERVER_VM_ARGUMENTS="-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx3G"
-              export ANDROID_JACK_VM_ARGS="$JACK_SERVER_VM_ARGUMENTS"
+              sed -i -e 's/, TLSv1.1, TLSv1//' -e 's/, TLSv1, TLSv1.1//' \"\$JAVA_SEC\"
+              export JACK_SERVER_VM_ARGUMENTS='-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx3G'
+              export ANDROID_JACK_VM_ARGS=\"\$JACK_SERVER_VM_ARGUMENTS\"
 
               # Fix telephony-common Error 41: IMms.aidl signature mismatch with SmsManager.java
               # The nothingstopsme manifest has an older IMms.aidl that lacks callingUser params.
               # Patch IMms.aidl to match official LineageOS cm-14.1 HEAD signatures.
-              echo "=== Patching IMms.aidl for callingUser support ==="
+              echo '=== Patching IMms.aidl for callingUser support ==='
               sed -i 's/void sendMessage(int subId, in int callingUser,/void sendMessage(int subId, int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
               sed -i 's/void downloadMessage(int subId, in int callingUser,/void downloadMessage(int subId, int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
               sed -i 's/Uri importMultimediaMessage(in int callingUser,/Uri importMultimediaMessage(int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
               sed -i 's/Uri addMultimediaMessageDraft(in int callingUser,/Uri addMultimediaMessageDraft(int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
 
-              echo "=== Starting build ==="
+              echo '=== Starting build ==='
               source build/envsetup.sh
               breakfast lineage_gtexsltedd-userdebug || {
-                echo "breakfast failed, trying lunch..."
+                echo 'breakfast failed, trying lunch...'
                 lunch lineage_gtexsltedd-userdebug
               }
 
               # SM-T285YD is ARMv7 / sc8830 — do NOT force arm64 here.
               # hwcomposer.sc8830 needs KERNEL_OBJ/usr/include, so build the
               # kernel (bootimage) before systemimage.
-              echo "=== Building kernel / bootimage first (for headers) ==="
-              make -j$(nproc) bootimage
+              echo '=== Building kernel / bootimage first (for headers) ==='
+              make -j\$(nproc) bootimage
 
-              echo "=== Building systemimage ==="
-              make -j$(nproc) systemimage
+              echo '=== Building systemimage ==='
+              make -j\$(nproc) systemimage
 
-              echo "=== Packaging results ==="
+              echo '=== Packaging results ==='
               cd out/target/product/gtexsltedd
               if [ -f boot.img ] && [ -f system.img ]; then
                 tar -cvf ap.tar -C ./ boot.img system.img
-                echo "Build successful!"
+                echo 'Build successful!'
               else
-                echo "Build artifacts missing!"
+                echo 'Build artifacts missing!'
                 ls -la
                 exit 1
               fi
-            '
+            "
 
       - name: Prepare release files
         run: |
