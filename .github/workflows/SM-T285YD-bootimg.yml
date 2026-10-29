@@ -134,5 +134,4 @@ jobs:
           body: |
             LineageOS 14.1 boot.img for SM-T285YD (gtexsltedd)
             This is the kernel + ramdisk image only.
-          env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
