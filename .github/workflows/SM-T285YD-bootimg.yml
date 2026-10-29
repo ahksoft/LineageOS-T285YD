@@ -125,13 +125,8 @@ jobs:
           cp $BUILD_ROOT/out/target/product/gtexsltedd/boot.img $GITHUB_WORKSPACE/release/
           ls -lh $GITHUB_WORKSPACE/release
 
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload boot.img artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: release/*
-          name: lineageos-sm-t285yd-bootimg-${{ github.run_id }}
-          tag_name: bootimg-${{ github.run_id }}
-          body: |
-            LineageOS 14.1 boot.img for SM-T285YD (gtexsltedd)
-            This is the kernel + ramdisk image only.
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: bootimg-sm-t285yd-${{ github.run_id }}
+          path: $BUILD_ROOT/out/target/product/gtexsltedd/boot.img
