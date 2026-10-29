@@ -105,10 +105,15 @@ jobs:
               # The nothingstopsme manifest has an older IMms.aidl that lacks callingUser params.
               # Patch IMms.aidl to match official LineageOS cm-14.1 HEAD signatures.
               echo '=== Patching IMms.aidl for callingUser support ==='
-              sed -i 's/void sendMessage(int subId, in int callingUser,/void sendMessage(int subId, int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
-              sed -i 's/void downloadMessage(int subId, in int callingUser,/void downloadMessage(int subId, int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
-              sed -i 's/Uri importMultimediaMessage(in int callingUser,/Uri importMultimediaMessage(int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
-              sed -i 's/Uri addMultimediaMessageDraft(in int callingUser,/Uri addMultimediaMessageDraft(int callingUser,/' frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
+              # The source tree is at /build (mounted from $BUILD_ROOT=/mnt/lineage on host)
+              if [ -f /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl ]; then
+                sed -i 's/void sendMessage(int subId, in int callingUser,/void sendMessage(int subId, int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
+                sed -i 's/void downloadMessage(int subId, in int callingUser,/void downloadMessage(int subId, int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
+                sed -i 's/Uri importMultimediaMessage(in int callingUser,/Uri importMultimediaMessage(int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
+                sed -i 's/Uri addMultimediaMessageDraft(in int callingUser,/Uri addMultimediaMessageDraft(int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
+              else
+                echo 'IMms.aidl not found at expected path - may not need patching'
+              fi
 
               echo '=== Starting build ==='
               source build/envsetup.sh
