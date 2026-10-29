@@ -38,13 +38,27 @@ jobs:
           git config --global user.name "builder"
           git config --global color.ui false
 
+      - name: Cache source tree
+        id: cache-source
+        uses: actions/cache@v4
+        with:
+          path: |
+            $BUILD_ROOT
+          key: ${{ runner.os }}-source-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-source-
+
       - name: Initialize and sync the source
         run: |
           cd $BUILD_ROOT
-          echo "=== Initializing SM-T285YD LineageOS 14.1 mirror ==="
-          # Device/kernel trees live in this custom manifest (nothingstopsme),
-          # not under official LineageOS/android.
-          repo init -u https://github.com/nothingstopsme/android_LineageOS.git -b cm-14.1_SM-T285YD --depth=1
+          if [ -f .repo/manifest.xml ]; then
+            echo "=== Source tree exists, skipping repo init ==="
+          else
+            echo "=== Initializing SM-T285YD LineageOS 14.1 mirror ==="
+            # Device/kernel trees live in this custom manifest (nothingstopsme),
+            # not under official LineageOS/android.
+            repo init -u https://github.com/nothingstopsme/android_LineageOS.git -b cm-14.1_SM-T285YD --depth=1
+          fi
 
           echo "=== Syncing source ==="
           repo sync -c -j$(nproc) --force-sync --no-clone-bundle --no-tags
@@ -101,21 +115,6 @@ jobs:
               export JACK_SERVER_VM_ARGUMENTS='-Dfile.encoding=UTF-8 -XX:+TieredCompilation -Xmx3G'
               export ANDROID_JACK_VM_ARGS=\"\$JACK_SERVER_VM_ARGUMENTS\"
 
-              # Fix telephony-common Error 41: IMms.aidl signature mismatch with SmsManager.java
-              # The nothingstopsme manifest has an older IMms.aidl that LACKS callingUser params.
-              # The official LineageOS cm-14.1 HEAD has callingUser params - need to ADD them.
-              echo '=== Patching IMms.aidl to ADD callingUser support ==='
-              # The source tree is at /build (mounted from $BUILD_ROOT=/mnt/lineage on host)
-              if [ -f /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl ]; then
-                # Add callingUser parameter to all 4 IMms methods
-                sed -i 's/void sendMessage(int subId,/void sendMessage(int subId, int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
-                sed -i 's/void downloadMessage(int subId,/void downloadMessage(int subId, int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
-                sed -i 's/Uri importMultimediaMessage(/Uri importMultimediaMessage(int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
-                sed -i 's/Uri addMultimediaMessageDraft(/Uri addMultimediaMessageDraft(int callingUser,/' /build/frameworks/opt/telephony/src/java/com/android/internal/telephony/IMms.aidl
-              else
-                echo 'IMms.aidl not found at expected path - may not need patching'
-              fi
-
               echo '=== Starting build ==='
               source build/envsetup.sh
               breakfast lineage_gtexsltedd-userdebug || {
@@ -123,19 +122,13 @@ jobs:
                 lunch lineage_gtexsltedd-userdebug
               }
 
-              # SM-T285YD is ARMv7 / sc8830 — do NOT force arm64 here.
-              # hwcomposer.sc8830 needs KERNEL_OBJ/usr/include, so build the
-              # kernel (bootimage) before systemimage.
-              echo '=== Building kernel / bootimage first (for headers) ==='
+              echo '=== Building bootimage ==='
               make -j\$(nproc) bootimage
-
-              echo '=== Building systemimage ==='
-              make -j\$(nproc) systemimage
 
               echo '=== Packaging results ==='
               cd out/target/product/gtexsltedd
-              if [ -f boot.img ] && [ -f system.img ]; then
-                tar -cvf ap.tar -C ./ boot.img system.img
+              if [ -f boot.img ]; then
+                tar -cvf ap.tar boot.img
                 echo 'Build successful!'
               else
                 echo 'Build artifacts missing!'
@@ -148,6 +141,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: lineageos-sm-t285yd-${{ github.run_id }}
-          path: |
-            /mnt/lineage/out/target/product/gtexsltedd/boot.img
-            /mnt/lineage/out/target/product/gtexsltedd/system.img
+          path: /mnt/lineage/out/target/product/gtexsltedd/boot.img
